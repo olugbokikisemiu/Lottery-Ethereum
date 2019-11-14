@@ -20,7 +20,7 @@ contract lottery {
         players.push(msg.sender);
     }
     
-    function randomGenerator() public view returns (uint) {
+    function randomGenerator() private view returns (uint) {
         return uint(keccak256(abi.encodePacked(block.difficulty, now, players)));
     }
     

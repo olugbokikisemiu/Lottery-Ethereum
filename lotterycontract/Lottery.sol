@@ -14,9 +14,7 @@ contract lottery {
         return players;
     }
     
-    function enter() public restrictManager payable {
-        require(msg.value > 0.1 ether, "Insufficient amount send ");
-        
+    function enter() public payable {
         players.push(msg.sender);
     }
     

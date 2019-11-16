@@ -31,14 +31,11 @@ func main() {
 		Local:  true,
 	}
 
-	lotterySession.Session = lotterySession.NewHandler("KEYSTORE", "KEYPASS")
+	lotterySession.Session = lotterySession.NewHandler("KEYSTORE2", "KEYPASS2")
 	lotterySession.LoadContract()
-	address, _ := lotterySession.GetAllPlayer()
-	// tx, err := lotterySession.JoinLottery()
-	// if err != nil {
-	// 	fmt.Printf("%v\n", err)
-	// }
-	// fmt.Println("Transaction hash ", tx)
-	// fmt.Println("From address ", lotterySession.Session.CallOpts.From.Hex())
-	fmt.Println(" address ", address)
+	address, err := lotterySession.GetAllPlayer()
+	if err != nil {
+		fmt.Println("Error %v\n ", err)
+	}
+	fmt.Println("address", address)
 }

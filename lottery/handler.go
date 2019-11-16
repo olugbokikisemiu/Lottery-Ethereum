@@ -2,7 +2,6 @@ package lottery
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"math/big"
 	"os"
@@ -65,9 +64,6 @@ func (h *Handler) NewHandler(keystore, keypass string) LotterySession {
 	auth.Nonce = big.NewInt(15)
 	auth.GasLimit = 3000000
 	auth.GasPrice = gasPrice
-	auth.Value = big.NewInt(200000000000000000)
-
-	fmt.Println("From ", auth.From.Hex())
 
 	return LotterySession{
 		TransactOpts: *auth,

@@ -55,15 +55,9 @@ func (h *Handler) NewHandler(keystore, keypass string) LotterySession {
 		auth = bind.NewKeyedTransactor(privateKey)
 	}
 
-	gasPrice, err := h.Client.SuggestGasPrice(h.Ctx)
-	if err != nil {
-		log.Fatalf("Error occured: %v", err)
-		gasPrice = big.NewInt(1000000)
-	}
-
-	auth.Nonce = big.NewInt(15)
+	auth.Nonce = big.NewInt(3)
 	auth.GasLimit = 3000000
-	auth.GasPrice = gasPrice
+	auth.GasPrice = big.NewInt(1000000)
 
 	return LotterySession{
 		TransactOpts: *auth,
@@ -112,8 +106,8 @@ func (h *Handler) GetAllPlayer() ([]common.Address, error) {
 	return h.Session.AllPlayer()
 }
 
-func (h *Handler) JoinLottery() (string, error) {
-	tx, err := h.Session.Enter()
+func (h *Handler) JoinLottery(playerAddress common.Address) (string, error) {
+	tx, err := h.Session.Enter(playerAddress)
 	if err != nil {
 		return "", err
 	}

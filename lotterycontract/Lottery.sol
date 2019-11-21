@@ -14,8 +14,8 @@ contract lottery {
         return players;
     }
     
-    function enter() public payable {
-        players.push(msg.sender);
+    function enter(address playerAddress) public payable {
+        players.push(playerAddress);
     }
     
     function randomGenerator() private view returns (uint) {
@@ -26,7 +26,7 @@ contract lottery {
         uint index = randomGenerator() % players.length;
         address payable selectedPlayer = address(uint160(players[index]));
         selectedPlayer.transfer(address(this).balance);
-        players = new address[](0);
+        players.length = 0;
         return selectedPlayer;
     }
     

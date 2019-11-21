@@ -4,3 +4,4 @@ go.mod
 go.sum
 .env
 boot.key
+node2

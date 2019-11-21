@@ -32,7 +32,9 @@ func main() {
 	}
 
 	lotterySession.Session = lotterySession.NewHandler("KEYSTORE2", "KEYPASS2")
-	lotterySession.LoadContract()
+	sess := lotterySession.LoadContract()
+	fmt.Println("From Address", sess.CallOpts.From.Hex())
+
 	address, err := lotterySession.GetAllPlayer()
 	if err != nil {
 		fmt.Println("Error %v\n ", err)

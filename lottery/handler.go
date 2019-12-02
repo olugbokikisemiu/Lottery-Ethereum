@@ -2,9 +2,11 @@ package lottery
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"math/big"
 	"os"
+	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -48,12 +50,19 @@ func (h *Handler) NewHandler(keystore, keypass string) LotterySession {
 		}
 
 	default:
-		privateKey, err := crypto.HexToECDSA(myEnv[""])
+		privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(myEnv[keypass], "0x"))
 		if err != nil {
 			log.Fatalf("Error loading private key from env: %v", err)
 		}
 		auth = bind.NewKeyedTransactor(privateKey)
 	}
+
+	blockNumber, err := h.Client.HeaderByNumber(h.Ctx, nil)
+	if err != nil {
+		log.Fatalf("block number Error occured: %v", err)
+	}
+
+	fmt.Println(blockNumber.Number)
 
 	auth.Nonce = big.NewInt(3)
 	auth.GasLimit = 3000000
@@ -66,6 +75,14 @@ func (h *Handler) NewHandler(keystore, keypass string) LotterySession {
 			Context: h.Ctx,
 		},
 	}
+}
+
+func (h *Handler) GetBalance() *big.Int {
+	bal, err := h.Client.BalanceAt(h.Ctx, h.Session.CallOpts.From, nil)
+	if err != nil {
+		log.Fatalf("An error occured: %+v", err)
+	}
+	return bal
 }
 
 func (h *Handler) DeployContract() LotterySession {
@@ -106,8 +123,8 @@ func (h *Handler) GetAllPlayer() ([]common.Address, error) {
 	return h.Session.AllPlayer()
 }
 
-func (h *Handler) JoinLottery(playerAddress common.Address) (string, error) {
-	tx, err := h.Session.Enter(playerAddress)
+func (h *Handler) JoinLottery() (string, error) {
+	tx, err := h.Session.Enter()
 	if err != nil {
 		return "", err
 	}
@@ -124,7 +141,7 @@ func (h *Handler) SelectWinner() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return tx.Hash().Hex(), nil
+	return tx.To().Hex(), nil
 }
 
 func updateEnv(key string, value string) {

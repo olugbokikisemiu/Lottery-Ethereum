@@ -1,7 +1,4 @@
 build
-node1
 go.mod
 go.sum
 .env
-boot.key
-node2

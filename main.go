@@ -28,16 +28,17 @@ func main() {
 	lotterySession := &lottery.Handler{
 		Ctx:    c,
 		Client: client,
-		Local:  true,
+		Local:  false,
 	}
 
-	lotterySession.Session = lotterySession.NewHandler("KEYSTORE2", "KEYPASS2")
-	sess := lotterySession.LoadContract()
-	fmt.Println("From Address", sess.CallOpts.From.Hex())
+	lotterySession.Session = lotterySession.NewHandler("", "KEYPASS5")
+
+	lotterySession.LoadContract()
 
 	address, err := lotterySession.GetAllPlayer()
 	if err != nil {
 		fmt.Println("Error %v\n ", err)
 	}
 	fmt.Println("address", address)
+	fmt.Println("Balance ", lotterySession.GetBalance())
 }

@@ -31,7 +31,7 @@ func main() {
 		Local:  false,
 	}
 
-	lotterySession.Session = lotterySession.NewHandler("", "KEYPASS5")
+	lotterySession.Session = lotterySession.NewHandler("KEYPASS5")
 
 	lotterySession.LoadContract()
 

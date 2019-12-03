@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"math/big"
-	"os"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -27,35 +26,18 @@ type Handler struct {
 func loadEnv() {
 	var err error
 	if myEnv, err = godotenv.Read(".env"); err != nil {
-		log.Printf("Could not load env: %v ", err)
+		log.Printf("Could not load env 🙍🏻‍♂️: %v ", err)
 	}
 }
 
-func (h *Handler) NewHandler(keystore, keypass string) LotterySession {
+func (h *Handler) NewHandler(keypass string) LotterySession {
 	loadEnv()
-	var auth *bind.TransactOpts
-	switch h.Local {
-	case true:
-		keyStore, err := os.Open(myEnv[keystore])
-		if err != nil {
-			log.Fatalf("Error getting keystore from env: %v", err)
-		}
 
-		defer keyStore.Close()
-
-		keyPass := myEnv[keypass]
-		auth, err = bind.NewTransactor(keyStore, keyPass)
-		if err != nil {
-			log.Fatalf("Error occured: %v", err)
-		}
-
-	default:
-		privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(myEnv[keypass], "0x"))
-		if err != nil {
-			log.Fatalf("Error loading private key from env: %v", err)
-		}
-		auth = bind.NewKeyedTransactor(privateKey)
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(myEnv[keypass], "0x"))
+	if err != nil {
+		log.Fatalf("Error loading private key from env: %v", err)
 	}
+	auth := bind.NewKeyedTransactor(privateKey)
 
 	blockNumber, err := h.Client.HeaderByNumber(h.Ctx, nil)
 	if err != nil {

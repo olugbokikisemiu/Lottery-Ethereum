@@ -2,9 +2,12 @@ package lottery
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"math/big"
+	"os"
+	"sort"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -30,23 +33,21 @@ func loadEnv() {
 	}
 }
 
-func (h *Handler) NewHandler(keypass string) LotterySession {
+func (h *Handler) NewHandler(key string) LotterySession {
 	loadEnv()
 
-	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(myEnv[keypass], "0x"))
+	privateKey, err := crypto.HexToECDSA(strings.TrimPrefix(key, "0x"))
 	if err != nil {
 		log.Fatalf("Error loading private key from env: %v", err)
 	}
 	auth := bind.NewKeyedTransactor(privateKey)
 
-	blockNumber, err := h.Client.HeaderByNumber(h.Ctx, nil)
-	if err != nil {
-		log.Fatalf("block number Error occured: %v", err)
-	}
+	// blockNumber, err := h.Client.HeaderByNumber(h.Ctx, nil)
+	// if err != nil {
+	// 	log.Fatalf("block number Error occured: %v", err)
+	// }
 
-	fmt.Println(blockNumber.Number)
-
-	auth.Nonce = big.NewInt(3)
+	auth.Nonce = big.NewInt(2)
 	auth.GasLimit = 3000000
 	auth.GasPrice = big.NewInt(1000000)
 
@@ -80,7 +81,7 @@ func (h *Handler) DeployContract() LotterySession {
 		updateEnv("ADDRESS", address.Hex())
 	}
 	h.Session.Contract = instance
-	log.Println("Contract Deployed🕺🏼🕺🏼! Transaction hash: %s", tx.Hash().Hex())
+	log.Printf("Contract Deployed🕺🏼🕺🏼! Transaction hash: %s", tx.Hash().Hex())
 	return h.Session
 }
 
@@ -106,6 +107,7 @@ func (h *Handler) GetAllPlayer() ([]common.Address, error) {
 }
 
 func (h *Handler) JoinLottery() (string, error) {
+	h.Session.TransactOpts.Value = big.NewInt(1000000000000000000)
 	tx, err := h.Session.Enter()
 	if err != nil {
 		return "", err
@@ -131,4 +133,32 @@ func updateEnv(key string, value string) {
 	if err := godotenv.Write(myEnv, ".env"); err != nil {
 		log.Fatalf("Unable to update env: %v", err)
 	}
+}
+
+func PrivateKeys() []string {
+	jsonFile, err := os.Open("keystore/ganache-accounts.json")
+	if err != nil {
+		log.Fatalf("Error opening file %+v ", err)
+	}
+
+	defer jsonFile.Close()
+
+	var ganacheConfig map[string]map[string]interface{}
+	var privateKeysList []string
+
+	value, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		log.Fatalf("Error reading file %+v ", err)
+	}
+	if err := json.Unmarshal(value, &ganacheConfig); err != nil {
+		log.Fatalf("Error unmarshalling json %+v ", err)
+	}
+
+	for _, v := range ganacheConfig["private_keys"] {
+		privateKeysList = append(privateKeysList, v.(string))
+	}
+
+	sort.Strings(privateKeysList)
+
+	return privateKeysList
 }

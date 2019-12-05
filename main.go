@@ -40,6 +40,6 @@ func main() {
 		fmt.Println("Error %v\n ", err)
 	}
 
-	fmt.Println("Winner", address)
+	fmt.Println("Address", address)
 	fmt.Println("Balance ", lotterySession.GetBalance())
 }

@@ -19,6 +19,7 @@ import (
 
 var myEnv map[string]string
 
+// Handler handles common needed values
 type Handler struct {
 	Ctx     context.Context
 	Session LotterySession
@@ -33,6 +34,8 @@ func loadEnv() {
 	}
 }
 
+// NewHandler binds transactor through private key
+// and returns the session
 func (h *Handler) NewHandler(key string) LotterySession {
 	loadEnv()
 
@@ -42,12 +45,7 @@ func (h *Handler) NewHandler(key string) LotterySession {
 	}
 	auth := bind.NewKeyedTransactor(privateKey)
 
-	// blockNumber, err := h.Client.HeaderByNumber(h.Ctx, nil)
-	// if err != nil {
-	// 	log.Fatalf("block number Error occured: %v", err)
-	// }
-
-	auth.Nonce = big.NewInt(2)
+	auth.Nonce = big.NewInt(0)
 	auth.GasLimit = 3000000
 	auth.GasPrice = big.NewInt(1000000)
 
@@ -60,6 +58,7 @@ func (h *Handler) NewHandler(key string) LotterySession {
 	}
 }
 
+// GetBalance returns the balance of specified address
 func (h *Handler) GetBalance() *big.Int {
 	bal, err := h.Client.BalanceAt(h.Ctx, h.Session.CallOpts.From, nil)
 	if err != nil {
@@ -68,6 +67,7 @@ func (h *Handler) GetBalance() *big.Int {
 	return bal
 }
 
+// DeployContract deploys smart contract
 func (h *Handler) DeployContract() LotterySession {
 	loadEnv()
 	address, tx, instance, err := DeployLottery(&h.Session.TransactOpts, h.Client)
@@ -85,6 +85,7 @@ func (h *Handler) DeployContract() LotterySession {
 	return h.Session
 }
 
+// LoadContract loads smart contract
 func (h *Handler) LoadContract() LotterySession {
 	var address common.Address
 	switch h.Local {
@@ -102,10 +103,12 @@ func (h *Handler) LoadContract() LotterySession {
 	return h.Session
 }
 
+// GetAllPlayer return []address of all players in lottery
 func (h *Handler) GetAllPlayer() ([]common.Address, error) {
 	return h.Session.AllPlayer()
 }
 
+// JoinLottery adds user to the lottery system([]address)
 func (h *Handler) JoinLottery() (string, error) {
 	h.Session.TransactOpts.Value = big.NewInt(1000000000000000000)
 	tx, err := h.Session.Enter()
@@ -115,11 +118,14 @@ func (h *Handler) JoinLottery() (string, error) {
 	return tx.Hash().Hex(), nil
 }
 
+// GetManager returns the address that deployed the contract
 func (h *Handler) GetManager() string {
 	add, _ := h.Session.Manager()
 	return add.Hex()
 }
 
+// SelectWinner choose an address at random and send
+// the coins to it
 func (h *Handler) SelectWinner() (string, error) {
 	tx, err := h.Session.SelectWinner()
 	if err != nil {
@@ -135,6 +141,8 @@ func updateEnv(key string, value string) {
 	}
 }
 
+// PrivateKeys gets the private key of acccounts from
+// ganache json file
 func PrivateKeys() []string {
 	jsonFile, err := os.Open("keystore/ganache-accounts.json")
 	if err != nil {

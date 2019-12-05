@@ -28,10 +28,10 @@ func main() {
 	lotterySession := &lottery.Handler{
 		Ctx:    c,
 		Client: client,
-		Local:  false,
+		Local:  true,
 	}
 
-	lotterySession.Session = lotterySession.NewHandler("KEYPASS5")
+	lotterySession.Session = lotterySession.NewHandler(lottery.PrivateKeys()[0])
 
 	lotterySession.LoadContract()
 
@@ -39,6 +39,7 @@ func main() {
 	if err != nil {
 		fmt.Println("Error %v\n ", err)
 	}
-	fmt.Println("address", address)
+
+	fmt.Println("Winner", address)
 	fmt.Println("Balance ", lotterySession.GetBalance())
 }

@@ -1,1 +1,1 @@
-ganache-cli
+ganache-cli --acctKeys="./ganache-accounts.json"

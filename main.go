@@ -37,7 +37,7 @@ func main() {
 
 	address, err := lotterySession.GetAllPlayer()
 	if err != nil {
-		fmt.Println("Error %v\n ", err)
+		fmt.Printf("Error %v\n ", err)
 	}
 
 	fmt.Println("Address", address)
